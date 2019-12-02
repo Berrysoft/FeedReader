@@ -1,3 +1,51 @@
 ﻿@page "/about"
+@using Berrysoft.Blazor.DataGrid
+@using FeedReader.Data
 
-<h1>About</h1>
+<h3>About FeedReader</h3>
+<p class="text-secondary">
+    Copyright (c) 2019 Berrysoft
+    <br />
+    <a href="https://github.com/Berrysoft/FeedReader" target="_blank">Source code</a>
+</p>
+
+<h4>Included open-source projects</h4>
+<div class="table-responsive-lg">
+    <DataGrid T="LibraryBox" Items="libraries">
+        <Headers>
+            <DataGridHeader PropertyName="Name" Sortable="true" Comparer="@StringComparer.OrdinalIgnoreCase">Name</DataGridHeader>
+            <DataGridHeader PropertyName="License" Sortable="true">License</DataGridHeader>
+        </Headers>
+        <ChildContent Context="library">
+            <td>
+                @if (library.Url == null)
+                {
+                    @library.Name
+                }
+                else
+                {
+                    <a href="@library.Url" target="_blank">@library.Name</a>
+                }
+            </td>
+            <td>
+                @if (library.LicenseUrl == null)
+                {
+                    @library.License
+                }
+                else
+                {
+                    <a href="@library.LicenseUrl" target="_blank">@library.License</a>
+                }
+            </td>
+        </ChildContent>
+    </DataGrid>
+</div>
+
+@code {
+    LibraryBox[] libraries = new LibraryBox[] {
+        new LibraryBox("Berrysoft.Blazor.DataGrid", "https://github.com/Berrysoft/Berrysoft.Blazor.DataGrid", "MIT", null),
+        new LibraryBox("HtmlAgilityPack", "https://html-agility-pack.net/", "MIT", null),
+        new LibraryBox("Microsoft.EntityFrameworkCore.Sqlite", "https://docs.microsoft.com/ef/core/", "Apache-2.0", null),
+        new LibraryBox("WebWindow.Blazor", "https://github.com/SteveSandersonMS/WebWindow/", "Apache-2.0", null),
+    };
+}
