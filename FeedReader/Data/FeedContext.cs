@@ -35,8 +35,6 @@ namespace FeedReader.Data
         public string? Generator { get; set; }
         public int Count { get; set; }
         public int RemainCount { get; set; }
-        [NotMapped]
-        public bool? Refreshed { get; set; }
     }
 
     public class BlogPost
