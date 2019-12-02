@@ -172,12 +172,13 @@
         {
             using (var context = new FeedContext())
             {
-                if (await AddFeedInternalAsync(context, uri) != null)
+                var feed = await AddFeedInternalAsync(context, uri);
+                if (feed != null)
                 {
+                    feeds!.Add(feed);
                     context.SaveChanges();
                 }
             }
-            AddFeedsPosts();
         }
     }
 
@@ -223,17 +224,14 @@
 
     public void RemoveFeed(Feed feed)
     {
-        if (feeds != null)
+        feeds!.Remove(feed);
+        StateHasChanged();
+        using (var context = new FeedContext())
         {
-            feeds.Remove(feed);
-            StateHasChanged();
-            using (var context = new FeedContext())
-            {
-                context.Posts.RemoveRange(context.Posts.Where(post => post.FeedId == feed.Id));
-                context.Feeds.Remove(feed);
-                context.SaveChanges();
-                posts = context.Posts.ToList();
-            }
+            context.Posts.RemoveRange(context.Posts.Where(post => post.FeedId == feed.Id));
+            context.Feeds.Remove(feed);
+            context.SaveChanges();
+            posts = context.Posts.ToList();
         }
     }
 }
