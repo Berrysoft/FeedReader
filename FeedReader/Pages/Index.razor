@@ -1,22 +1,33 @@
 ﻿@page "/"
+@using System.Diagnostics
 @using System.ServiceModel.Syndication
 @using System.Xml
 @using FeedReader.Data
 @using HtmlAgilityPack
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
 <div class="row">
-    <div class="col-3">
+    <div class="col-4">
         <div class="list-group list-group-flush" id="list-tab" role="tablist">
-            @if (feeds != null)
+            @if (feeds != null && posts != null)
             {
-                @for (int i = 0; i < feeds.Length; i++)
+                @foreach (var (feed, i) in feeds.Select((f, index) => (f, index)))
                 {
-                    <a class="list-group-item list-group-item-action @(i == 0 ? "active" : string.Empty)" id="list-@(feeds[i].Id)-list" data-toggle="list" href="#list-@(feeds[i].Id)" role="tab">
-                        <img src="@feeds[i].ImageUri" width="16" height="16" />
-                        @feeds[i].Title
+                    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(i == 0 ? "active" : string.Empty)" id="list-@(feed.Id)-list" data-toggle="list" href="#list-@(feed.Id)" role="tab">
+                        <div>
+                            <img src="@feed.ImageUri" width="16" height="16" />
+                            @feed.Title
+                        </div>
+                        <div>
+                            <span class="badge @(feed.Refreshed switch { null => "badge-warning", true => "badge-primary", false => "badge-error" }) badge-pill">
+                                @posts.Where(post => post.FeedId == feed.Id && post.LastReadTime == null).Count()
+                            </span>
+                            <span class="text-danger" @onclick="() => RemoveFeed(feed)">&times;</span>
+                        </div>
                     </a>
                 }
+                <a class="list-group-item list-group-item-action text-center text-success" @onclick="ShowAddFeed">+</a>
             }
         </div>
     </div>
@@ -24,13 +35,13 @@
         <div class="tab-content" id="nav-tabContent">
             @if (feeds != null && posts != null)
             {
-                @for (int i = 0; i < feeds.Length; i++)
+                @foreach (var (feed, i) in feeds.Select((f, index) => (f, index)))
                 {
-                    <div class="tab-pane fade @(i == 0 ? "show active" : string.Empty)" id="list-@(feeds[i].Id)" role="tabpanel">
+                    <div class="tab-pane fade @(i == 0 ? "show active" : string.Empty)" id="list-@(feed.Id)" role="tabpanel">
                         <div class="list-group list-group-flush">
-                            @foreach (var p in posts.Where(post => post.FeedId == feeds[i].Id).OrderBy(post => post.LastReadTime).ThenByDescending(post => post.UpdateTime))
+                            @foreach (var p in posts.Where(post => post.FeedId == feed.Id).OrderBy(post => post.LastReadTime).ThenByDescending(post => post.UpdateTime))
                             {
-                                <a class="list-group-item list-group-item-action" href="@p.Link" target="_blank">
+                                <a class="list-group-item list-group-item-action" href="@p.Link" target="_blank" @onclick="() => UpdateLastReadTime(p)">
                                     <h3>@p.Title</h3>
                                     <p class="text-secondary">
                                         <time datetime="@p.UpdateTime">@p.UpdateTime</time>
@@ -47,12 +58,24 @@
 </div>
 
 @code {
-    Feed[]? feeds;
-    BlogPost[]? posts;
+    List<Feed>? feeds;
+    List<BlogPost>? posts;
 
     protected override async Task OnInitializedAsync()
     {
+        AddFeedsPosts();
         await RefreshAsync();
+    }
+
+    private void AddFeedsPosts()
+    {
+        using (var context = new FeedContext())
+        {
+            context.Database.EnsureCreated();
+            feeds = context.Feeds.ToList();
+            posts = context.Posts.ToList();
+        }
+        StateHasChanged();
     }
 
     private void UpdatePost(BlogPost blogPost, SyndicationItem item)
@@ -142,23 +165,75 @@
         }
     }
 
+    private async void ShowAddFeed()
+    {
+        var uri = await JSRuntime.InvokeAsync<string>("showAddFeed");
+        if (!string.IsNullOrEmpty(uri))
+        {
+            using (var context = new FeedContext())
+            {
+                if (await AddFeedInternalAsync(context, uri) != null)
+                {
+                    context.SaveChanges();
+                }
+            }
+            AddFeedsPosts();
+        }
+    }
+
     private async Task RefreshAsync()
     {
         using (var context = new FeedContext())
         {
-            if (feeds == null || posts == null)
-            {
-                feeds = context.Feeds.ToArray();
-                posts = context.Posts.ToArray();
-            }
             foreach (var feed in context.Feeds)
             {
-                await UpdateFeedAsync(context, feed);
-                context.Feeds.Update(feed);
+                try
+                {
+                    await UpdateFeedAsync(context, feed);
+                    context.Feeds.Update(feed);
+                    feed.Refreshed = true;
+                    posts = context.Posts.ToList();
+                }
+                catch (Exception)
+                {
+                    feed.Refreshed = false;
+                }
+                StateHasChanged();
             }
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+    }
+
+    private void UpdateLastReadTime(BlogPost post)
+    {
+        using (var context = new FeedContext())
+        {
+            post.LastReadTime = DateTime.Now;
+            context.Posts.Update(post);
             context.SaveChanges();
-            feeds = context.Feeds.ToArray();
-            posts = context.Posts.ToArray();
+        }
+    }
+
+    public void RemoveFeed(Feed feed)
+    {
+        if (feeds != null)
+        {
+            feeds.Remove(feed);
+            StateHasChanged();
+            using (var context = new FeedContext())
+            {
+                context.Posts.RemoveRange(context.Posts.Where(post => post.FeedId == feed.Id));
+                context.Feeds.Remove(feed);
+                context.SaveChanges();
+                posts = context.Posts.ToList();
+            }
         }
     }
 }
