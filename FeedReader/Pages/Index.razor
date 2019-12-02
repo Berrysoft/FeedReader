@@ -20,7 +20,7 @@
                 {
                     <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(i == 0 ? "active" : string.Empty)" id="list-@(feed.Id)-list" data-toggle="list" href="#list-@(feed.Id)" role="tab">
                         <div>
-                            <span class="text-danger" @onclick="() => RemoveFeed(feed)">&times;</span>
+                            <span class="fas fa-trash-alt text-danger" @onclick="() => RemoveFeed(feed)"></span>
                             <img src="@feed.ImageUri" width="16" height="16" />
                             @feed.Title
                         </div>
@@ -29,7 +29,9 @@
                         </span>
                     </a>
                 }
-                <a class="list-group-item list-group-item-action text-center text-success" @onclick="ShowAddFeed">+</a>
+                <a class="list-group-item list-group-item-action text-center" @onclick="ShowAddFeed">
+                    <span class="text-success">+</span>
+                </a>
             </div>
         </div>
         <div class="col-8">
