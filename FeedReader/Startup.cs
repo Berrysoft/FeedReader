@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,6 +8,7 @@ namespace FeedReader
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<HttpClient>();
         }
 
         public void Configure(IComponentsApplicationBuilder app)

@@ -1,5 +1,9 @@
 ﻿@page "/"
+@using System.ServiceModel.Syndication
+@using System.Xml
 @using FeedReader.Data
+@using HtmlAgilityPack
+@inject HttpClient Http
 
 <div class="row">
     <div class="col-3">
@@ -24,7 +28,7 @@
                 {
                     <div class="tab-pane fade @(i == 0 ? "show active" : string.Empty)" id="list-@(feeds[i].Id)" role="tabpanel">
                         <div class="list-group list-group-flush">
-                            @foreach (var p in posts.Where(post => post.FeedId == feeds[i].Id))
+                            @foreach (var p in posts.Where(post => post.FeedId == feeds[i].Id).OrderBy(post => post.LastReadTime).ThenByDescending(post => post.UpdateTime))
                             {
                                 <a class="list-group-item list-group-item-action" href="@p.Link" target="_blank">
                                     <h3>@p.Title</h3>
@@ -46,11 +50,113 @@
     Feed[]? feeds;
     BlogPost[]? posts;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+    }
+
+    private void UpdatePost(BlogPost blogPost, SyndicationItem item)
+    {
+        blogPost.PostId = item.Id;
+        blogPost.Title = item.Title?.Text;
+        blogPost.Link = item.Links.FirstOrDefault()?.Uri?.ToString();
+        if (item.Summary != null)
+        {
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(item.Summary?.Text);
+            var des = doc.DocumentNode.InnerText;
+            if (des.Length > 100)
+            {
+                des = des.Substring(0, 100);
+            }
+            blogPost.Description = des.Replace('\n', ' ');
+        }
+        else
+        {
+            blogPost.Description = null;
+        }
+        blogPost.UpdateTime = item.PublishDate > item.LastUpdatedTime ? item.PublishDate.DateTime : item.LastUpdatedTime.DateTime;
+    }
+
+    private async Task UpdateFeedAsync(FeedContext context, Feed feed)
+    {
+        using (var response = await Http.GetAsync(feed.FeedUri))
+        using (var stream = await response.Content.ReadAsStreamAsync())
+        using (var reader = XmlReader.Create(stream))
+        {
+            var sf = SyndicationFeed.Load(reader);
+            feed.Title = sf.Title?.Text;
+            feed.Link = sf.Links.FirstOrDefault()?.Uri?.ToString();
+            feed.ImageUri = sf.ImageUrl?.ToString();
+            if (feed.ImageUri == null)
+            {
+                var fu = new Uri(feed.FeedUri);
+                feed.ImageUri = fu.GetLeftPart(UriPartial.Authority) + "/favicon.ico";
+            }
+            feed.LastBuildDate = sf.LastUpdatedTime.DateTime;
+            feed.Generator = sf.Generator;
+            int readed = feed.Count - feed.RemainCount;
+            int count = 0;
+            foreach (var item in sf.Items)
+            {
+                BlogPost? blogPost = context.Posts.Find(feed.Id, item.Id);
+                if (blogPost != null)
+                {
+                    if (blogPost.UpdateTime < item.LastUpdatedTime.DateTime || blogPost.UpdateTime < item.PublishDate.DateTime)
+                    {
+                        blogPost.FeedId = feed.Id;
+                        UpdatePost(blogPost, item);
+                        blogPost.LastReadTime = null;
+                        context.Posts.Update(blogPost);
+                        readed--;
+                    }
+                }
+                else
+                {
+                    blogPost = new BlogPost();
+                    blogPost.FeedId = feed.Id;
+                    UpdatePost(blogPost, item);
+                    blogPost.LastReadTime = null;
+                    context.Posts.Add(blogPost);
+                }
+                count++;
+            }
+            feed.Count = count;
+            feed.RemainCount = count - readed;
+        }
+    }
+
+    private async Task<Feed?> AddFeedInternalAsync(FeedContext context, string feedUri)
+    {
+        if (!context.Feeds.Any(feed => feed.FeedUri == feedUri))
+        {
+            Feed feed = new Feed();
+            feed.FeedUri = feedUri;
+            await UpdateFeedAsync(context, feed);
+            context.Feeds.Add(feed);
+            return feed;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private async Task RefreshAsync()
     {
         using (var context = new FeedContext())
         {
-            context.Database.EnsureCreated();
+            if (feeds == null || posts == null)
+            {
+                feeds = context.Feeds.ToArray();
+                posts = context.Posts.ToArray();
+            }
+            foreach (var feed in context.Feeds)
+            {
+                await UpdateFeedAsync(context, feed);
+                context.Feeds.Update(feed);
+            }
+            context.SaveChanges();
             feeds = context.Feeds.ToArray();
             posts = context.Posts.ToArray();
         }
