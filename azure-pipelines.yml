@@ -3,7 +3,7 @@ trigger:
 
 variables:
   sdkVersion: '3.1.100-preview3-014645'
-  project: '**/*.csproj'
+  project: 'FeedReader/FeedReader.csproj'
 
 jobs:
 - job: Windows
@@ -88,7 +88,7 @@ jobs:
   - script: dotnet publish $(project) -c Release -o build/netcoreapp3.1
     displayName: 'Publish project as netcoreapp3.1'
 
-  - script: del build/netcoreapp3.1/*.pdb
+  - script: rm build/netcoreapp3.1/*.pdb
     displayName: 'Remove PDBs'
 
   - task: ArchiveFiles@2
@@ -147,7 +147,7 @@ jobs:
   - script: dotnet publish $(project) -c Release -o build/netcoreapp3.1
     displayName: 'Publish project as netcoreapp3.1'
 
-  - script: del build/netcoreapp3.1/*.pdb
+  - script: rm build/netcoreapp3.1/*.pdb
     displayName: 'Remove PDBs'
 
   - task: ArchiveFiles@2
