@@ -24,7 +24,7 @@ jobs:
       feedsToUse: config
       nugetConfigPath: NuGet.Config
 
-  - script: dotnet publish $(project) -c Release -o build\netcoreapp3.1
+  - script: dotnet publish $(project) -c Release -o build\netcoreapp3.1 -d n
     displayName: 'Publish project as netcoreapp3.1'
 
   - script: del build\netcoreapp3.1\*.pdb
@@ -38,7 +38,7 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)\FeedReader.Win64.zip'
 
-  # - script: dotnet publish $(project) -r win-x64 -c Release -o build\native -p:PublishNative=true
+  # - script: dotnet publish $(project) -r win-x64 -c Release -o build\native -p:PublishNative=true -d n
   #   displayName: 'Publish project as native'
 
   # - script: del build\native\*.pdb
@@ -85,7 +85,7 @@ jobs:
       sudo ln /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2 /usr/lib/libgssapi_krb5.so
     displayName: 'Install clang-3.9'
 
-  - script: dotnet publish $(project) -c Release -o build/netcoreapp3.1
+  - script: dotnet publish $(project) -c Release -o build/netcoreapp3.1 -d n
     displayName: 'Publish project as netcoreapp3.1'
 
   - script: rm build/netcoreapp3.1/*.pdb
@@ -100,7 +100,7 @@ jobs:
       tarCompression: 'gz'
       archiveFile: '$(Build.ArtifactStagingDirectory)/FeedReader.Linux64.tar.gz'
 
-  # - script: dotnet publish $(project) -r linux-x64 -c Release -o build/linux-x64 -p:PublishNative=true
+  # - script: dotnet publish $(project) -r linux-x64 -c Release -o build/linux-x64 -p:PublishNative=true -d n
   #   displayName: 'Publish project as native'
 
   # - script: strip build/linux-x64/FeedReader
@@ -144,7 +144,7 @@ jobs:
       feedsToUse: config
       nugetConfigPath: NuGet.Config
 
-  - script: dotnet publish $(project) -c Release -o build/netcoreapp3.1
+  - script: dotnet publish $(project) -c Release -o build/netcoreapp3.1 -d n
     displayName: 'Publish project as netcoreapp3.1'
 
   - script: rm build/netcoreapp3.1/*.pdb
@@ -158,7 +158,7 @@ jobs:
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/FeedReader.OSX64.zip'
 
-  # - script: dotnet publish $(project) -r osx-x64 -c Release -o build/osx-x64 -p:PublishNative=true
+  # - script: dotnet publish $(project) -r osx-x64 -c Release -o build/osx-x64 -p:PublishNative=true -d n
   #   displayName: 'Publish project as native'
   
   # - script: strip build/osx-x64/FeedReader
