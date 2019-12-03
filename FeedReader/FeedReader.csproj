@@ -24,4 +24,19 @@
     </Content>
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(PublishNative)'=='true'">
+    <IlcInvariantGlobalization>true</IlcInvariantGlobalization>
+    <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(PublishNative)'=='true'">
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(PublishNative)'=='true'">
+    <RdXmlFile Include="Properties/Default.rd.xml" />
+    <IlcArg Include="--nometadatablocking" />
+  </ItemGroup>
+
 </Project>
