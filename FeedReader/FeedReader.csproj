@@ -24,9 +24,9 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(PublishNative)'=='true'">
-    <IlcInvariantGlobalization>true</IlcInvariantGlobalization>
     <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
     <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+    <RootAllApplicationAssemblies>false</RootAllApplicationAssemblies>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(PublishNative)'=='true'">

@@ -39,18 +39,18 @@
                 @foreach (var (feed, i) in context.Feeds.AsEnumerable().Select((f, index) => (f, index)))
                 {
                     <div class="tab-pane fade @(i == 0 ? "show active" : string.Empty)" id="list-@(feed.Id)" role="tabpanel">
-                        <div class="list-group list-group-flush">
+                        <ul class="list-group list-group-flush">
                             @foreach (var p in context.Posts.Where(post => post.FeedId == feed.Id).OrderBy(post => post.LastReadTime).ThenByDescending(post => post.UpdateTime))
                             {
-                                <a class="list-group-item list-group-item-action" href="@p.Link" target="_blank" @onclick="() => UpdateLastReadTime(p)">
+                                <li class="list-group-item list-group-item-action" style="cursor: pointer" @onclick="() => OpenPost(p)">
                                     <h3>@p.Title</h3>
                                     <p class="text-secondary">
                                         <time datetime="@p.UpdateTime">@p.UpdateTime</time>
                                     </p>
                                     <p>@p.Description</p>
-                                </a>
+                                </li>
                             }
-                        </div>
+                        </ul>
                     </div>
                 }
             </div>
@@ -197,6 +197,14 @@
                 Debug.WriteLine(ex);
             }
         }
+    }
+
+    private void OpenPost(BlogPost post)
+    {
+        ProcessStartInfo info = new ProcessStartInfo(post.Link);
+        info.UseShellExecute = true;
+        Process.Start(info);
+        UpdateLastReadTime(post);
     }
 
     private void UpdateLastReadTime(BlogPost post)
