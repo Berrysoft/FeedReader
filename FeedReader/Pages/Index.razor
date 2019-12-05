@@ -44,13 +44,13 @@
                         <ul class="list-group list-group-flush">
                             @foreach (var p in context.Posts.Where(post => post.FeedId == feed.Id).OrderBy(post => post.LastReadTime).ThenByDescending(post => post.UpdateTime))
                             {
-                                <li class="list-group-item list-group-item-action" style="cursor: pointer" @onclick="() => OpenPost(p)">
+                                <ExternLink Tag="li" class="list-group-item list-group-item-action" style="cursor: pointer" Uri="@p.Link" OnClick="() => UpdateLastReadTimeAsync(p)">
                                     <h3>@p.Title</h3>
                                     <p class="text-secondary">
                                         <time datetime="@p.UpdateTime">@p.UpdateTime</time>
                                     </p>
                                     <p>@((MarkupString)p.Description)</p>
-                                </li>
+                                </ExternLink>
                             }
                         </ul>
                     </div>
@@ -140,7 +140,7 @@
         }
     }
 
-    private async void ShowAddFeed()
+    private async Task ShowAddFeed()
     {
         var uri = await JSRuntime.InvokeAsync<string>("prompt", "Please input feed uri:");
         if (!string.IsNullOrEmpty(uri))
@@ -190,14 +190,6 @@
         }
     }
 
-    private async void OpenPost(BlogPost post)
-    {
-        ProcessStartInfo info = new ProcessStartInfo(post.Link);
-        info.UseShellExecute = true;
-        Process.Start(info);
-        await UpdateLastReadTimeAsync(post);
-    }
-
     private async Task UpdateLastReadTimeAsync(BlogPost post)
     {
         using (var context = new FeedContext())
@@ -208,7 +200,7 @@
         }
     }
 
-    private async void RemoveFeed(Feed feed)
+    private async Task RemoveFeed(Feed feed)
     {
         using (var context = new FeedContext())
         {

@@ -4,14 +4,12 @@
 @using FeedReader.Data
 
 <h3>About FeedReader</h3>
-<p>
-    Version @Assembly.GetExecutingAssembly().GetName().Version
-</p>
 <p class="text-secondary">
     Copyright (c) 2019 Berrysoft
 </p>
 <p>
-    <a href="https://github.com/Berrysoft/FeedReader" target="_blank">Source code</a>
+    Version @Assembly.GetExecutingAssembly().GetName().Version
+    <ExternLink Tag="span" class="btn-link" Uri="https://github.com/Berrysoft/FeedReader">Source code</ExternLink>
 </p>
 
 <h4>Included open-source projects</h4>
@@ -29,7 +27,7 @@
                 }
                 else
                 {
-                    <a href="@library.Url" target="_blank">@library.Name</a>
+                    <ExternLink Tag="span" class="btn-link" Uri="@library.Url">@library.Name</ExternLink>
                 }
             </td>
             <td>
@@ -39,7 +37,7 @@
                 }
                 else
                 {
-                    <a href="@library.LicenseUrl" target="_blank">@library.License</a>
+                    <ExternLink Tag="span" class="btn-link" Uri="@library.LicenseUrl">@library.License</ExternLink>
                 }
             </td>
         </ChildContent>
