@@ -4,11 +4,27 @@ trigger:
 variables:
   sdkVersion: '3.1.100'
   project: 'FeedReader/FeedReader.csproj'
+  configuration: 'Release'
 
 jobs:
-- job: Windows
+- job: 'Build'
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-latest'
+        rid: 'linux-x64'
+        suffix: 'Linux64'
+      mac:
+        imageName: 'macos-latest'
+        rid: 'osx-x64'
+        suffix: 'OSX64'
+      windows:
+        imageName: 'windows-latest'
+        rid: 'win-x64'
+        suffix: 'Win64'
   pool:
-    vmImage: 'windows-latest'
+    vmImage: $(imageName)
+
   steps:
   - task: UseDotNet@2
     displayName: 'Install .NET Core SDK 3.1'
@@ -16,109 +32,27 @@ jobs:
       packageType: sdk
       version: '$(sdkVersion)'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore project'
-    inputs:
-      projects: '$(project)'
-      command: restore
-      feedsToUse: config
-      nugetConfigPath: NuGet.Config
-
-  - script: dotnet publish $(project) -r win-x64 -c Release -o build\netcoreapp3.1 -v n
-    displayName: 'Publish project as netcoreapp3.1'
-
-  - script: del build\netcoreapp3.1\*.pdb
-    displayName: 'Remove PDBs'
+  - script: dotnet publish $(project) -r $(rid) -c Release -o build -v n -p:PublishTrimmed=true -p:PublishSingleFile=true
+    displayName: 'Publish project'
 
   - task: ArchiveFiles@2
+    condition: ne(variables.rid, 'linux-x64')
     displayName: 'Archive'
     inputs:
-      rootFolderOrFile: 'build\netcoreapp3.1'
+      rootFolderOrFile: 'build'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)\FeedReader.Win64.zip'
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish'
-    inputs:
-      artifactName: 'publish'
-
-- job: Linux
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: UseDotNet@2
-    displayName: 'Install .NET Core SDK 3.1'
-    inputs:
-      packageType: sdk
-      version: '$(sdkVersion)'
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore project'
-    inputs:
-      projects: '$(project)'
-      command: restore
-      feedsToUse: config
-      nugetConfigPath: NuGet.Config
-      
-  - script: |
-      wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-      sudo apt-add-repository "deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main"
-      sudo apt -o Acquire::AllowInsecureRepositories=true update && sudo apt-get install clang-3.9 lldb-3.9 comerr-dev krb5-multidev libgssrpc4 libkadm5clnt-mit9 libkadm5srv-mit9 libkdb5-8 libkrb5-dev
-      sudo ln /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2 /usr/lib/libgssapi_krb5.so
-    displayName: 'Install clang-3.9'
-
-  - script: dotnet publish $(project) -r linux-x64 -c Release -o build/netcoreapp3.1 -v n
-    displayName: 'Publish project as netcoreapp3.1'
-
-  - script: rm build/netcoreapp3.1/*.pdb
-    displayName: 'Remove PDBs'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/FeedReader.$(suffix).zip'
 
   - task: ArchiveFiles@2
+    condition: eq(variables.rid, 'linux-x64')
     displayName: 'Archive'
     inputs:
-      rootFolderOrFile: 'build/netcoreapp3.1'
+      rootFolderOrFile: 'build'
       includeRootFolder: false
       archiveType: 'tar'
       tarCompression: 'gz'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/FeedReader.Linux64.tar.gz'
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish'
-    inputs:
-      artifactName: 'publish'
-
-- job: MacOS
-  pool:
-    vmImage: 'macOS-latest'
-  steps:
-  - task: UseDotNet@2
-    displayName: 'Install .NET Core SDK 3.1'
-    inputs:
-      packageType: sdk
-      version: '$(sdkVersion)'
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore project'
-    inputs:
-      projects: '$(project)'
-      command: restore
-      feedsToUse: config
-      nugetConfigPath: NuGet.Config
-
-  - script: dotnet publish $(project) -r osx-x64 -c Release -o build/netcoreapp3.1 -v n
-    displayName: 'Publish project as netcoreapp3.1'
-
-  - script: rm build/netcoreapp3.1/*.pdb
-    displayName: 'Remove PDBs'
-
-  - task: ArchiveFiles@2
-    displayName: 'Archive'
-    inputs:
-      rootFolderOrFile: 'build/netcoreapp3.1'
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/FeedReader.OSX64.zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/FeedReader.$(suffix).tar.gz'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish'

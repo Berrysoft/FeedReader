@@ -5,8 +5,6 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <RazorLangVersion>3.0</RazorLangVersion>
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
