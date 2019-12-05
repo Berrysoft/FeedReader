@@ -4,6 +4,7 @@
 @using System.Xml
 @using FeedReader.Data
 @using HtmlAgilityPack
+@using Microsoft.EntityFrameworkCore
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
@@ -155,7 +156,7 @@
 
     private async void ShowAddFeed()
     {
-        var uri = await JSRuntime.InvokeAsync<string>("showAddFeed");
+        var uri = await JSRuntime.InvokeAsync<string>("prompt", "Please input feed uri:");
         if (!string.IsNullOrEmpty(uri))
         {
             using (var context = new FeedContext())
@@ -186,15 +187,15 @@
                 {
                     refreshed[i] = false;
                 }
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    Debug.WriteLine(ex);
+                }
                 StateHasChanged();
-            }
-            try
-            {
-                context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
             }
         }
     }
