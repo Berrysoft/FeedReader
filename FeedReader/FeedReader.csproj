@@ -5,37 +5,32 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <RazorLangVersion>3.0</RazorLangVersion>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Berrysoft.Blazor.DataGrid" Version="1.0.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.17" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor" Version="3.1.0-preview4.19579.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.0" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="4.7.0" />
     <PackageReference Include="WebWindow.Blazor" Version="0.1.0-*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.0" />
+    <PackageReference Include="SQLitePCLRaw.bundle_winsqlite3" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Update="wwwroot\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(PublishNative)'=='true'">
-    <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
-    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
-    <RootAllApplicationAssemblies>false</RootAllApplicationAssemblies>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(PublishNative)'=='true'">
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(PublishNative)'=='true'">
-    <RdXmlFile Include="Properties/Default.rd.xml" />
-    <IlcArg Include="--nometadatablocking" />
   </ItemGroup>
 
 </Project>
