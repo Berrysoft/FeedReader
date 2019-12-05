@@ -11,7 +11,7 @@
 
 <h4>Included open-source projects</h4>
 <div class="table-responsive-lg">
-    <DataGrid T="LibraryBox" Items="libraries">
+    <DataGrid T="LibraryBox" Items="Libraries">
         <Headers>
             <DataGridHeader PropertyName="Name" Sortable="true" Comparer="@StringComparer.OrdinalIgnoreCase">Name</DataGridHeader>
             <DataGridHeader PropertyName="License" Sortable="true">License</DataGridHeader>
@@ -42,7 +42,7 @@
 </div>
 
 @code {
-    LibraryBox[] libraries = new LibraryBox[] {
+    private static readonly LibraryBox[] Libraries = new LibraryBox[] {
         new LibraryBox("Berrysoft.Blazor.DataGrid", "https://github.com/Berrysoft/Berrysoft.Blazor.DataGrid", "MIT", null),
         new LibraryBox("HtmlAgilityPack", "https://html-agility-pack.net/", "MIT", null),
         new LibraryBox("Microsoft.EntityFrameworkCore.Sqlite", "https://docs.microsoft.com/ef/core/", "Apache-2.0", null),
