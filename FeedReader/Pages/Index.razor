@@ -3,7 +3,6 @@
 @using System.ServiceModel.Syndication
 @using System.Xml
 @using FeedReader.Data
-@using HtmlAgilityPack
 @using Microsoft.EntityFrameworkCore
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
@@ -25,7 +24,7 @@
                             @feed.Title
                         </div>
                         <div>
-                            <span class="badge @(refreshed == null ? "badge-warning" : (refreshed[i] switch { null => "badge-warning", true => "badge-primary", false => "badge-danger" })) badge-pill">
+                            <span class="badge @(refreshed == null ? "badge-warning" : (refreshed[i] ? "badge-primary" : "badge-danger")) badge-pill">
                                 @context.Posts.Where(post => post.FeedId == feed.Id && post.LastReadTime == null).Count()
                             </span>
                             <span class="fas fa-trash-alt text-danger" @onclick="() => RemoveFeed(feed)" aria-label="Delete"></span>
@@ -62,7 +61,7 @@
 }
 
 @code {
-    bool?[]? refreshed;
+    bool[]? refreshed;
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,21 +73,6 @@
         blogPost.PostId = item.Id;
         blogPost.Title = item.Title?.Text;
         blogPost.Link = item.Links.FirstOrDefault()?.Uri?.ToString();
-        //if (item.Summary != null)
-        //{
-        //    HtmlDocument doc = new HtmlDocument();
-        //    doc.LoadHtml(item.Summary?.Text);
-        //    var des = doc.DocumentNode.InnerText;
-        //    if (des.Length > 100)
-        //    {
-        //        des = des.Substring(0, 100);
-        //    }
-        //    blogPost.Description = des.Replace('\n', ' ');
-        //}
-        //else
-        //{
-        //    blogPost.Description = null;
-        //}
         blogPost.Description = item.Summary?.Text;
         blogPost.UpdateTime = item.PublishDate > item.LastUpdatedTime ? item.PublishDate.DateTime : item.LastUpdatedTime.DateTime;
     }
@@ -132,7 +116,7 @@
                     blogPost.FeedId = feed.Id;
                     UpdatePost(blogPost, item);
                     blogPost.LastReadTime = null;
-                    context.Posts.Add(blogPost);
+                    await context.Posts.AddAsync(blogPost);
                 }
                 count++;
             }
@@ -141,13 +125,13 @@
         }
     }
 
-    private Feed? AddFeedInternal(FeedContext context, string feedUri)
+    private async Task<Feed?> AddFeedInternalAsync(FeedContext context, string feedUri)
     {
         if (!context.Feeds.Any(feed => feed.FeedUri == feedUri))
         {
             Feed feed = new Feed();
             feed.FeedUri = feedUri;
-            context.Feeds.Add(feed);
+            await context.Feeds.AddAsync(feed);
             return feed;
         }
         else
@@ -163,10 +147,10 @@
         {
             using (var context = new FeedContext())
             {
-                var feed = AddFeedInternal(context, uri);
+                var feed = await AddFeedInternalAsync(context, uri);
                 if (feed != null)
                 {
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     await RefreshInternalAsync(context, feed);
                 }
             }
@@ -186,7 +170,7 @@
         }
         try
         {
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
         catch (DbUpdateException ex)
         {
@@ -200,39 +184,37 @@
     {
         using (var context = new FeedContext())
         {
-            refreshed = new bool?[context.Feeds.Count()];
-            foreach (var (feed, i) in context.Feeds.AsEnumerable().Select((f, index) => (f, index)))
-            {
-                refreshed[i] = await RefreshInternalAsync(context, feed);
-            }
+            var refreshTasks = context.Feeds.AsEnumerable().Select(feed => RefreshInternalAsync(context, feed)).ToArray();
+            await Task.Run(() => Task.WaitAll(refreshTasks));
+            refreshed = refreshTasks.Select(t => t.Result).ToArray();
         }
     }
 
-    private void OpenPost(BlogPost post)
+    private async void OpenPost(BlogPost post)
     {
         ProcessStartInfo info = new ProcessStartInfo(post.Link);
         info.UseShellExecute = true;
         Process.Start(info);
-        UpdateLastReadTime(post);
+        await UpdateLastReadTimeAsync(post);
     }
 
-    private void UpdateLastReadTime(BlogPost post)
+    private async Task UpdateLastReadTimeAsync(BlogPost post)
     {
         using (var context = new FeedContext())
         {
             post.LastReadTime = DateTime.Now;
             context.Posts.Update(post);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 
-    private void RemoveFeed(Feed feed)
+    private async void RemoveFeed(Feed feed)
     {
         using (var context = new FeedContext())
         {
             context.Posts.RemoveRange(context.Posts.Where(post => post.FeedId == feed.Id));
             context.Feeds.Remove(feed);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }
