@@ -25,6 +25,11 @@
 
     <Assembly Name="Berrysoft.Blazor.DataGrid" Dynamic="Required All" />
 
+    <Assembly Name="Microsoft.Extensions.Logging">
+      <Type Name="Microsoft.Extensions.Logging.ProviderAliasAttribute" Dynamic="Required All" />
+      <Type Name="Microsoft.Extensions.Logging.LoggerFilterOptions" Dynamic="Required All" />
+    </Assembly>
+
     <Assembly Name="Microsoft.Extensions.Logging.Console">
       <Type Name="Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider" Dynamic="Required All" />
     </Assembly>
@@ -33,6 +38,10 @@
       <Type Name="Microsoft.Extensions.Options.OptionsMonitor`1[[Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions,Microsoft.Extensions.Logging.Console]]" Dynamic="Required All" />
       <Type Name="Microsoft.Extensions.Options.OptionsFactory`1[[Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions,Microsoft.Extensions.Logging.Console]]" Dynamic="Required All" />
       <Type Name="Microsoft.Extensions.Options.OptionsCache`1[[Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions,Microsoft.Extensions.Logging.Console]]" Dynamic="Required All" />
+      <Type Name="Microsoft.Extensions.Options.OptionsMonitor`1[[Microsoft.Extensions.Logging.LoggerFilterOptions,Microsoft.Extensions.Logging]]" Dynamic="Required All" />
+      <Type Name="Microsoft.Extensions.Options.OptionsFactory`1[[Microsoft.Extensions.Logging.LoggerFilterOptions,Microsoft.Extensions.Logging]]" Dynamic="Required All" />
+      <Type Name="Microsoft.Extensions.Options.OptionsCache`1[[Microsoft.Extensions.Logging.LoggerFilterOptions,Microsoft.Extensions.Logging]]" Dynamic="Required All" />
+      <Type Name="Microsoft.Extensions.Options.OptionsManager`1[[Microsoft.Extensions.Caching.Memory.MemoryCacheOptions,Microsoft.Extensions.Caching.Memory]]" Dynamic="Required All" />
     </Assembly>
 
     <Assembly Name="Microsoft.Extensions.Logging.Configuration">
@@ -40,6 +49,11 @@
       <Type Name="Microsoft.Extensions.Logging.Configuration.LoggerProviderConfiguration`1[[Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider,Microsoft.Extensions.Logging.Console]]" Dynamic="Required All" />
       <Type Name="Microsoft.Extensions.Logging.Configuration.LoggerProviderConfigurationFactory" Dynamic="Required All" />
       <Type Name="Microsoft.Extensions.Logging.Configuration.LoggerProviderOptionsChangeTokenSource`2[[Microsoft.Extensions.Logging.Console.ConsoleLoggerOptions,Microsoft.Extensions.Logging.Console],[Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider,Microsoft.Extensions.Logging.Console]]" Dynamic="Required All" />
+    </Assembly>
+
+    <Assembly Name="Microsoft.Extensions.Caching.Memory">
+      <Type Name="Microsoft.Extensions.Caching.Memory.MemoryCache" Dynamic="Required All" />
+      <Type Name="Microsoft.Extensions.Caching.Memory.MemoryCacheOptions" Dynamic="Required All" />
     </Assembly>
 
     <Assembly Name="Microsoft.AspNetCore.Components">
@@ -58,8 +72,83 @@
 
     <Assembly Name="WebWindow.Blazor" Dynamic="Required All" />
 
-    <Assembly Name="Microsoft.Extensions.Logging">
-      <Type Name="Microsoft.Extensions.Logging.ProviderAliasAttribute" Dynamic="Required All" />
+    <Assembly Name="Microsoft.EntityFrameworkCore">
+      <Type Name="Microsoft.EntityFrameworkCore.Internal.DiagnosticsLogger`1[[Microsoft.EntityFrameworkCore.DbLoggerCategory+Infrastructure,Microsoft.EntityFrameworkCore]]" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Internal.DbSetInitializer" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.DbSet`1[[FeedReader.Data.Feed,FeedReader]]" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.DbSet`1[[FeedReader.Data.BlogPost,FeedReader]]" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Metadata.Internal.ClrPropertySetterFactory" Dynamic="Required All">
+        <Method Name="CreateGeneric" Dynamic="Required">
+          <GenericArgument Name="FeedReader.Data.FeedContext,FeedReader" />
+          <GenericArgument Name="Microsoft.EntityFrameworkCore.DbSet`1[[FeedReader.Data.Feed,FeedReader]], Microsoft.EntityFrameworkCore" />
+          <GenericArgument Name="Microsoft.EntityFrameworkCore.DbSet`1[[FeedReader.Data.Feed,FeedReader]], Microsoft.EntityFrameworkCore" />
+        </Method>
+        <Method Name="CreateGeneric" Dynamic="Required">
+          <GenericArgument Name="FeedReader.Data.FeedContext,FeedReader" />
+          <GenericArgument Name="Microsoft.EntityFrameworkCore.DbSet`1[[FeedReader.Data.BlogPost,FeedReader]], Microsoft.EntityFrameworkCore" />
+          <GenericArgument Name="Microsoft.EntityFrameworkCore.DbSet`1[[FeedReader.Data.BlogPost,FeedReader]], Microsoft.EntityFrameworkCore" />
+        </Method>
+      </Type>
+      <Type Name="Microsoft.EntityFrameworkCore.Metadata.Internal.ClrPropertyGetterFactory" Dynamic="Required All">
+        <Method Name="CreateGeneric" Dynamic="Required">
+          <GenericArgument Name="FeedReader.Data.Feed,FeedReader" />
+          <GenericArgument Name="System.Int32,System.Runtime" />
+          <GenericArgument Name="System.Int32,System.Runtime" />
+        </Method>
+        <Method Name="CreateGeneric" Dynamic="Required">
+          <GenericArgument Name="FeedReader.Data.BlogPost,FeedReader" />
+          <GenericArgument Name="System.Int32,System.Runtime" />
+          <GenericArgument Name="System.Int32,System.Runtime" />
+        </Method>
+      </Type>
+      <Type Name="Microsoft.EntityFrameworkCore.Storage.DatabaseProvider`1[[Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteOptionsExtension,Microsoft.EntityFrameworkCore.Sqlite]]" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.Internal.ChangeDetector" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverterSelector" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Storage.TypeMappingSourceDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Metadata.Internal.ParameterBindingFactories" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Metadata.Internal.ConstructorBindingFactory" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Metadata.Internal.MemberClassifier" Dynamic="Required All" />
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal.CoreConventionSetBuilderDependencies" Dynamic="Required All" />-->
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal.CoreConventionSetBuilder" Dynamic="Required All" />-->
+      <Type Name="Microsoft.EntityFrameworkCore.Infrastructure.ModelCustomizerDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Infrastructure.ModelCacheKeyFactory" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Infrastructure.ModelSourceDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Infrastructure.ModelValidatorDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Query.QueryContextDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Storage.ExecutionStrategyDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Query.CompiledQueryCacheKeyGeneratorDependencies" Dynamic="Required All" />
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal.EntityResultFindingExpressionVisitorFactory" Dynamic="Required All" />-->
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Query.ResultOperatorHandler" Dynamic="Required All" />-->
+      <Type Name="Microsoft.EntityFrameworkCore.Query.IIncludableQueryable`2" Dynamic="Required All" />
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Query.Internal.QueryModelGenerator" Dynamic="Required All" />-->
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal.RequiresMaterializationExpressionVisitorFactory" Dynamic="Required All" />-->
+      <!--<Type Name="Microsoft.EntityFrameworkCore.Query.Internal.QueryCompilationContextDependencies" Dynamic="Required All" />-->
+      <Type Name="Microsoft.EntityFrameworkCore.Storage.DatabaseDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.Internal.NavigationFixer" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntryNotifier" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ValueGeneration.ValueGeneratorCache" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ValueGeneration.ValueGeneratorSelectorDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ValueGeneration.ValueGeneratorSelector" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.Internal.KeyPropagator" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.Internal.ValueGenerationManager" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Internal.DbContextDependencies" Dynamic="Required All" />
+      <Type Name="Microsoft.EntityFrameworkCore.Internal.DbSetSource">
+        <Method Name="CreateSetFactory" Dynamic="Required">
+          <GenericArgument Name="FeedReader.Data.Feed,FeedReader" />
+        </Method>
+        <Method Name="CreateSetFactory" Dynamic="Required">
+          <GenericArgument Name="FeedReader.Data.BlogPost,FeedReader" />
+        </Method>
+      </Type>
+      <Type Name="Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer`1[[System.Int32,System.Runtime]]" Dynamic="Required All" />
     </Assembly>
+
+    <Assembly Name="Microsoft.EntityFrameworkCore.Relational" Dynamic="Required All" />
+
+    <Assembly Name="Microsoft.EntityFrameworkCore.Sqlite" Dynamic="Required All" />
   </Application>
 </Directives>
