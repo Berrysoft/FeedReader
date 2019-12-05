@@ -5,6 +5,9 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <RazorLangVersion>3.0</RazorLangVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

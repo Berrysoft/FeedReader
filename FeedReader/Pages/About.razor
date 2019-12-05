@@ -1,11 +1,16 @@
 ﻿@page "/about"
+@using System.Reflection
 @using Berrysoft.Blazor.DataGrid
 @using FeedReader.Data
 
 <h3>About FeedReader</h3>
+<p>
+    Version @Assembly.GetExecutingAssembly().GetName().Version
+</p>
 <p class="text-secondary">
     Copyright (c) 2019 Berrysoft
-    <br />
+</p>
+<p>
     <a href="https://github.com/Berrysoft/FeedReader" target="_blank">Source code</a>
 </p>
 
