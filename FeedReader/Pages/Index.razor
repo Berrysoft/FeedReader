@@ -141,13 +141,12 @@
         }
     }
 
-    private async Task<Feed?> AddFeedInternalAsync(FeedContext context, string feedUri)
+    private Feed? AddFeedInternal(FeedContext context, string feedUri)
     {
         if (!context.Feeds.Any(feed => feed.FeedUri == feedUri))
         {
             Feed feed = new Feed();
             feed.FeedUri = feedUri;
-            await UpdateFeedAsync(context, feed);
             context.Feeds.Add(feed);
             return feed;
         }
@@ -164,14 +163,37 @@
         {
             using (var context = new FeedContext())
             {
-                var feed = await AddFeedInternalAsync(context, uri);
+                var feed = AddFeedInternal(context, uri);
                 if (feed != null)
                 {
                     context.SaveChanges();
+                    await RefreshInternalAsync(context, feed);
                 }
             }
-            await RefreshAsync();
         }
+    }
+
+    private async Task<bool> RefreshInternalAsync(FeedContext context, Feed feed)
+    {
+        try
+        {
+            await UpdateFeedAsync(context, feed);
+            context.Feeds.Update(feed);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (DbUpdateException ex)
+        {
+            Debug.WriteLine(ex);
+        }
+        StateHasChanged();
+        return true;
     }
 
     private async Task RefreshAsync()
@@ -181,25 +203,7 @@
             refreshed = new bool?[context.Feeds.Count()];
             foreach (var (feed, i) in context.Feeds.AsEnumerable().Select((f, index) => (f, index)))
             {
-                try
-                {
-                    await UpdateFeedAsync(context, feed);
-                    context.Feeds.Update(feed);
-                    refreshed[i] = true;
-                }
-                catch (Exception)
-                {
-                    refreshed[i] = false;
-                }
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    Debug.WriteLine(ex);
-                }
-                StateHasChanged();
+                refreshed[i] = await RefreshInternalAsync(context, feed);
             }
         }
     }
