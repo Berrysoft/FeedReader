@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace FeedReader.Data
@@ -13,7 +15,11 @@ namespace FeedReader.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(@"Data Source=feeds.db");
+            var builder = new SqliteConnectionStringBuilder();
+            string configFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FeedReader");
+            Directory.CreateDirectory(configFolder);
+            builder.DataSource = Path.Combine(configFolder, "feeds.db");
+            optionsBuilder.UseSqlite(builder.ToString());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
