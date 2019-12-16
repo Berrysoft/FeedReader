@@ -24,7 +24,7 @@
                             @feed.Title
                         </div>
                         <div>
-                            <span class="badge @(refreshed == null ? "badge-warning" : (refreshed[i] ? "badge-primary" : "badge-danger")) badge-pill">
+                            <span class="badge @(GetRefreshed(feed) switch { null => "badge-warning", true => "badge-primary", false => "badge-danger"}) badge-pill">
                                 @context.Posts.Where(post => post.FeedId == feed.Id && post.LastReadTime == null).Count()
                             </span>
                             <span class="fas fa-trash-alt text-danger" @onclick="() => RemoveFeed(feed)" aria-label="Delete"></span>
@@ -61,11 +61,23 @@
 }
 
 @code {
-    bool[]? refreshed;
+    Dictionary<int, bool> refreshed = new Dictionary<int, bool>();
 
     protected override async Task OnInitializedAsync()
     {
         await RefreshAsync();
+    }
+
+    private bool? GetRefreshed(Feed feed)
+    {
+        if (refreshed.TryGetValue(feed.Id, out bool r))
+        {
+            return r;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private void UpdatePost(BlogPost blogPost, SyndicationItem item)
@@ -157,7 +169,7 @@
         }
     }
 
-    private async Task<bool> RefreshInternalAsync(FeedContext context, Feed feed)
+    private async Task RefreshInternalAsync(FeedContext context, Feed feed)
     {
         try
         {
@@ -166,7 +178,8 @@
         }
         catch (Exception)
         {
-            return false;
+            refreshed[feed.Id] = false;
+            return;
         }
         try
         {
@@ -176,17 +189,16 @@
         {
             Debug.WriteLine(ex);
         }
+        refreshed[feed.Id] = true;
         StateHasChanged();
-        return true;
     }
 
     private async Task RefreshAsync()
     {
         using (var context = new FeedContext())
         {
-            var refreshTasks = context.Feeds.AsEnumerable().Select(feed => RefreshInternalAsync(context, feed)).ToArray();
-            await Task.Run(() => Task.WaitAll(refreshTasks));
-            refreshed = refreshTasks.Select(t => t.Result).ToArray();
+            var refreshTasks = context.Feeds.AsEnumerable().Select(feed => RefreshInternalAsync(context, feed));
+            await Task.WhenAll(refreshTasks);
         }
     }
 
@@ -205,6 +217,7 @@
         using (var context = new FeedContext())
         {
             context.Posts.RemoveRange(context.Posts.Where(post => post.FeedId == feed.Id));
+            refreshed.Remove(feed.Id);
             context.Feeds.Remove(feed);
             await context.SaveChangesAsync();
         }
