@@ -2,7 +2,7 @@ trigger:
 - master
 
 variables:
-  sdkVersion: '3.1.100'
+  sdkVersion: '5.0.201'
   project: 'FeedReader/FeedReader.csproj'
   configuration: 'Release'
 
