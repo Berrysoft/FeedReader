@@ -1,6 +1,6 @@
 using System.Net.Http;
-using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Photino.Blazor;
 
 namespace FeedReader
 {
@@ -11,7 +11,7 @@ namespace FeedReader
             services.AddSingleton<HttpClient>();
         }
 
-        public void Configure(IComponentsApplicationBuilder app)
+        public void Configure(DesktopApplicationBuilder app)
         {
             app.AddComponent<App>("app");
         }

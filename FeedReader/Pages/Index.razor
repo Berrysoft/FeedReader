@@ -49,7 +49,7 @@
                                     <p class="text-secondary">
                                         <time datetime="@p.UpdateTime">@p.UpdateTime</time>
                                     </p>
-                                    <p>@((MarkupString)p.Description)</p>
+                                    <p>@((MarkupString)(p.Description ?? string.Empty))</p>
                                 </ExternLink>
                             }
                         </ul>
